@@ -1,2 +1,9 @@
-# mi-primer-proyecto
-Alumno de la maestria en ciencia de datos del ITBA 🧚‍♀️🤯
+   ```markdown
+   # Mi primer proyecto
+
+   Soy Gonzalo Tajada y estoy aprendiendo a usar GitHub.
+
+   ## Mi objetivo
+
+   Quiero organizar mis trabajos de Big Data.
+   ``
