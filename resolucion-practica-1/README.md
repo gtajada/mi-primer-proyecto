@@ -46,3 +46,13 @@ Un directorio Parquet suelto no tiene historial, auditoría ni garantías transa
 - **Variedad:** tres formatos (CSV, JSON, Parquet) con distintos niveles de estructura: texto plano sin tipos, JSON semi-estructurado con campos anidados y Parquet columnar con esquema embebido.
 - **Veracidad:** `bronze_transactions` tiene 50.011 filas pero solo 50.000 `transaction_id` distintos (11 duplicados) y 52 importes que no pueden convertirse a `DECIMAL(12,2)`. Además, los tipos de `product_id` no coinciden entre fuentes. Bronze conserva estos problemas como evidencia y se corrigen en Silver.
 - **Valor:** cruzando transacciones, clientes, productos y eventos se puede analizar ventas por canal de pago y categoría, entender el comportamiento previo a la compra y detectar fraude (`is_fraud`). Ese valor solo es confiable si antes se resuelven los problemas de veracidad: sumar importes desde Bronze inflaría las ventas por los duplicados.
+
+## 3. Desafío — Reflexión final
+
+**Detectar** una evolución de esquema es observar que el contrato cambió: en este lote apareció `app_version`, un `event_type` nuevo (`refund`) y eventos duplicados. Es un diagnóstico técnico que no decide nada.
+
+**Aceptarla técnicamente** es lograr que el pipeline la absorba sin romperse ni perder datos: `unionByName` con `allowMissingColumns` incorpora la columna con `NULL` en la historia, la deduplicación por `event_id` garantiza unicidad y el `overwrite` sobre una tabla nueva hace el proceso idempotente sin tocar `bronze_events`.
+
+**Decidir que es válida para el negocio** es otra cosa: requiere que alguien defina si `refund` debe restar ventas, cómo se interpreta un `app_version` nulo, o qué versión de un evento duplicado es la correcta. Que Spark pueda unir los datos no significa que sean correctos para analizarlos. Bronze acepta; la validación de negocio corresponde a Silver y a los dueños del dato.
+
+Resultado: `bronze_events_v2` con 210.000 filas y 210.000 `event_id` distintos; una segunda ejecución produjo el mismo total.
