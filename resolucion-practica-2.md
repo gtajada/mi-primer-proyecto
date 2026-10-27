@@ -9,7 +9,6 @@
 
 ## 1. DAG del Job
 
-![DAG del Job](img/dag.png)
 
 Cuatro tareas en línea, cada una dependiente de la anterior:
 
@@ -44,8 +43,6 @@ Como el `assert` corta antes de escribir la auditoría, esas corridas no dejaron
 - La versión vigente de la transacción 42 en `silver_transactions` es la de `batch_004`, con `amount = 1999.99` y el `updated_at` más reciente (pregunta 4). Es exactamente lo que verifica `historical_correction_applied`.
 - `silver_transactions` no tiene ids duplicados (pregunta 5).
 
-![Historial de corridas del Job](img/job_fallido.png)
-
 **Causa probable de las corridas rojas.** En la columna *Run parameters* del historial se ve que el parámetro del Job se llama `expected_batch` (por ejemplo `expected_batch: batch_004`) y no `expected_batch_id`, que es el nombre del widget que lee `04_validate_pipeline`. Como los nombres no coinciden, el valor que puse en el Job nunca llegó al notebook: `validate` usó el valor por defecto del widget (`batch_002`) y exigió que la corrección de la transacción 42 viniera de `batch_002`, cuando la versión vigente ya venía de `batch_003`/`batch_004`. Es un error de configuración del Job, no del procesamiento de los datos. Corrección: renombrar el parámetro a `expected_batch_id` y reejecutar con el lote correspondiente.
 
 ## 3. `batch_002`: aceptadas y rechazadas
@@ -78,24 +75,20 @@ Como el grano de `gold_daily_sales` es más fino que "un día", cualquier pregun
 Código en [05_visualizacion.ipynb](05_visualizacion.ipynb).
 
 ### Consigna 1: Evolución temporal
-![Consigna 1](img/consigna1.png)
 
 **Respuesta:** El **2026-03-01** fue a la vez el día de mayor monto ($7.310.840,77) y el de mayor cantidad de transacciones (7.236), así que los máximos coinciden. Su ticket promedio (≈ $1.010) es similar al del resto de los días de la carga inicial (≈ $989 a ≈ $1.012): el monto lo explica el volumen, no compras más grandes. Los días 10, 11 y 12 de marzo (~200 transacciones) son los lotes incrementales y no se comparan con la carga inicial. Además, el 8 y el 9 de marzo no tienen datos.
 
 ### Consigna 2: Canal y fraude
-![Consigna 2](img/consigna2.png)
 
 **Respuesta:** **transfer** tiene la mayor tasa global de fraude: **13,91 %** (2.336 / 16.789), contra 12,97 % de wallet y 12,54 % de card. La conclusión se sostiene al considerar el volumen: los tres canales tienen casi la misma cantidad de transacciones (~16.800), así que la diferencia está en la tasa y no en el tamaño del canal.
 
 ### Consigna 3: Concentración geográfica y de producto
-![Consigna 3](img/consigna3.png)
 
 Elegí un mapa de calor porque cruza dos dimensiones categóricas en una sola figura: la celda más oscura muestra el máximo global y la ★ marca la categoría líder de cada país.
 
 **Respuesta:** La combinación de mayor monto es **Brasil × home ($2.371.688,08)**. No hay una categoría dominante en todos los países: **home** lidera en BR, UY y CL, y **books** en AR y MX. En varios casos la diferencia es mínima (CL: home 2.171,0k contra books 2.165,5k). Fashion y electronics quedan últimas en todos los mercados.
 
 ### Consigna 4: Calidad del pipeline
-![Consigna 4](img/consigna4.png)
 
 **Respuesta:** `initial` tuvo **99,9 % de aceptadas** (51 rechazos sobre 49.999). `batch_002`, `batch_003` y `batch_004` tuvieron **≈ 99,0 %** cada uno (2 rechazos sobre 202, 202 y 203). En proporción, los lotes nuevos rechazan unas 10 veces más, pero son sólo 2 filas por lote.
 
