@@ -1,0 +1,47 @@
+flowchart LR
+  subgraph FUENTES["Fuentes"]
+    A1["POS / ERP<br/>ventas y stock"]
+    A2["Shopify<br/>pedidos e-commerce"]
+    A3["Catálogo, precios<br/>y promos"]
+    A4["Externas<br/>IPC, dólar, calendario"]
+  end
+
+  subgraph INGESTA["Ingesta"]
+    B1["Exportes diarios<br/>CSV/Parquet"]
+    B2["n8n + webhooks<br/>Shopify"]
+    B3["Descarga programada<br/>APIs públicas"]
+  end
+
+  subgraph LAKE["Lakehouse en Databricks (Delta Lake + Unity Catalog)"]
+    direction TB
+    L0[("Landing<br/>archivos crudos")]
+    L1[("Bronze<br/>copia fiel + metadatos")]
+    L2[("Silver<br/>limpio, tipado, deduplicado")]
+    L3[("Gold<br/>modelo estrella + agregados")]
+    L0 --> L1 --> L2 --> L3
+  end
+
+  subgraph OPS["Orquestación y calidad"]
+    O1["Lakeflow Pipelines / Jobs<br/>(DAG diario)"]
+    O2["Expectations<br/>(reglas de calidad)"]
+  end
+
+  subgraph CONSUMO["Consumo"]
+    C1["SQL Warehouse"]
+    C2["Power BI<br/>tablero comercial"]
+    C3["Sugerencia de reposición<br/>(tabla Gold)"]
+    C4["MLflow<br/>modelo de demanda"]
+  end
+
+  A1 --> B1 --> L0
+  A2 --> B2 --> L0
+  A3 --> B1
+  A4 --> B3 --> L0
+  O1 -.orquesta.-> L1
+  O1 -.orquesta.-> L2
+  O1 -.orquesta.-> L3
+  O2 -.valida.-> L2
+  L3 --> C1 --> C2
+  L3 --> C3
+  L3 --> C4
+  C4 --> C3

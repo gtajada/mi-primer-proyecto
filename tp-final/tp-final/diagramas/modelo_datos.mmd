@@ -1,0 +1,73 @@
+erDiagram
+  DIM_PRODUCTO ||--o{ FACT_VENTAS : "sku_id"
+  DIM_LOCAL ||--o{ FACT_VENTAS : "local_id"
+  DIM_FECHA ||--o{ FACT_VENTAS : "fecha_id"
+  DIM_CANAL ||--o{ FACT_VENTAS : "canal_id"
+  DIM_PROMO ||--o{ FACT_VENTAS : "promo_id"
+  DIM_PRODUCTO ||--o{ FACT_STOCK_DIARIO : "sku_id"
+  DIM_LOCAL ||--o{ FACT_STOCK_DIARIO : "local_id"
+  DIM_FECHA ||--o{ FACT_STOCK_DIARIO : "fecha_id"
+  DIM_PRODUCTO ||--o{ FACT_REPOSICION : "sku_id"
+  DIM_LOCAL ||--o{ FACT_REPOSICION : "local_id"
+  DIM_FECHA ||--o{ FACT_REPOSICION : "fecha_id"
+
+  DIM_PRODUCTO {
+    string sku_id PK
+    string marca
+    string categoria
+    string temporada
+    string talle
+    string color
+    decimal costo
+    decimal precio_lista
+  }
+  DIM_LOCAL {
+    string local_id PK
+    string nombre
+    string provincia
+    string tipo "calle, shopping, outlet"
+    int m2
+  }
+  DIM_FECHA {
+    int fecha_id PK
+    date fecha
+    int semana_anio
+    string feriado
+  }
+  DIM_CANAL {
+    string canal_id PK
+    string nombre "local, shopify, mayorista"
+  }
+  DIM_PROMO {
+    string promo_id PK
+    string tipo
+    decimal descuento_pct
+    date vigencia_desde
+    date vigencia_hasta
+  }
+  FACT_VENTAS {
+    string ticket_id PK
+    int linea_nro PK
+    string sku_id FK
+    string local_id FK
+    int fecha_id FK
+    string canal_id FK
+    string promo_id FK
+    int unidades
+    decimal monto_neto
+  }
+  FACT_STOCK_DIARIO {
+    string sku_id PK
+    string local_id PK
+    int fecha_id PK
+    int stock_unidades
+    int stock_en_transito
+  }
+  FACT_REPOSICION {
+    string sku_id PK
+    string local_id PK
+    int fecha_id PK
+    int unidades_sugeridas
+    int unidades_aprobadas
+    string motivo
+  }
